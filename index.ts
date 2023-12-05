@@ -1,3 +1,3 @@
-import * as Exercise from "./src/02";
+import * as Exercise from "./src/03";
 
-const result = Exercise.run().then((res) => console.log(res));
+Exercise.run().then((res) => console.log(res));
