@@ -5,7 +5,7 @@ const extractNumbers = (text: string) =>
   text.split(" ").filter(Boolean).map(Number);
 
 // Part 1
-export const run = async () => {
+export const runPart1 = async () => {
   const data = await readFileSync("./src/05/input.txt", "utf-8");
 
   const lines = splitLines(data);
@@ -52,74 +52,55 @@ export const run = async () => {
 
 // Doesn't work yet...
 
-// export const run = async () => {
-//   const data = await readFileSync("./src/05/input.txt", "utf-8");
+export const run = async () => {
+  const data = await readFileSync("./src/05/input-test.txt", "utf-8");
 
-//   const lines = splitLines(data);
+  const lines = splitLines(data);
 
-//   const seedsLine = lines.shift();
-//   const [_, seedsText] = seedsLine.split(": ");
-//   const seedRanges = extractNumbers(seedsText);
-//   const seeds: number[][] = [];
+  const seedsLine = lines.shift();
+  const [_, seedsText] = seedsLine.split(": ");
+  const seedRanges = extractNumbers(seedsText);
+  const seeds: number[][] = [];
 
-//   for (let i = 0; i < seedRanges.length; i += 2) {
-//     seeds.push([seedRanges[i], seedRanges[i] + seedRanges[i + 1]]);
-//   }
+  for (let i = 0; i < seedRanges.length; i += 2) {
+    seeds.push([seedRanges[i], seedRanges[i] + seedRanges[i + 1]]);
+  }
 
-//   const transformers = lines.reduce((acc, line) => {
-//     if (!line.trim()) {
-//       return acc;
-//     }
+  const functions = lines.reduce((acc, line) => {
+    if (!line.trim()) {
+      return acc;
+    }
 
-//     if (line.includes("map")) {
-//       acc.push({});
-//       return acc;
-//     }
+    if (line.includes("map")) {
+      acc.push([]);
+      return acc;
+    }
 
-//     const [destinationStart, sourceStart, range] = extractNumbers(line);
+    const [destinationStart, sourceStart, range] = extractNumbers(line);
 
-//     acc[acc.length - 1][`${sourceStart} ${sourceStart + range}`] =
-//       destinationStart - sourceStart;
+    acc[acc.length - 1].push({
+      min: sourceStart,
+      max: sourceStart + range,
+      value: destinationStart - sourceStart,
+    });
 
-//     return acc;
-//   }, [] as Record<string, number>[]);
+    return acc;
+  }, [] as { min: number; max: number; value: number }[][]);
 
-//   const ranges = transformers.reduce((transformedSeeds, transform) => {
-//     return transformedSeeds.reduce((tsAcc, seedRange) => {
-//       const [minSeed, maxSeed] = seedRange;
+  functions.reduce((acc, funcRanges) => {
+    seeds.map(seedRange => {
+      const [min, max] = seedRange;
 
-//       const newAcc = Object.entries(transform).reduce((eAcc, entry) => {
-//         const [range, value] = entry;
-//         const [minRange, maxRange] = extractNumbers(range);
+      funcRanges.reduce((fAcc, func) => {
+        if (func.max <= min || func.min > max) {
+          return fAcc
+        } else {
+          // Split sets
+          return fAcc
+        }
+      }, seedRange)
+    })
 
-//         if (maxSeed < minRange || minSeed > maxRange) {
-//           return eAcc;
-//         } else {
-//           if (maxRange < maxSeed) {
-//             return [
-//               ...eAcc,
-//               [minSeed + value, maxRange + value],
-//               [maxRange, maxSeed],
-//             ];
-//           } else if (minRange > minSeed) {
-//             return [
-//               ...eAcc,
-//               [minSeed, minRange],
-//               [minRange + value, maxSeed + value],
-//             ];
-//           } else {
-//             return [...eAcc, [minSeed + value, maxSeed + value]];
-//           }
-//         }
-//       }, []);
-
-//       if (newAcc.length === 0) {
-//         return [...tsAcc, [minSeed, maxSeed]];
-//       }
-
-//       return [...tsAcc, ...newAcc];
-//     }, []);
-//   }, seeds);
-
-//   return Math.min(...ranges.map((i) => i[0]));
-// };
+    return acc;
+  }, seeds)
+};
